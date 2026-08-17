@@ -9,6 +9,7 @@ from app.db.database import motor
 from app.db.modelos.gasolinera import Gasolinera
 from app.db.modelos.favorito import Favorito, GasolineraGuardadaInput
 from app.db.modelos.dispositivo import Dispositivo
+from app.db.modelos.alerta import Alerta, AlertaPrecioInput
 
 # Inicializamos la app de FastAPI
 app = FastAPI(title="API Gasolineras")
@@ -41,7 +42,7 @@ def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), ra
 
     return lista_gasolinera
 
-@app.get("/gasolineras/favoritas/{id_usuario}")
+@app.get("/favoritos/{id_usuario}")
 def obtener_gasolineras_favoritas(id_usuario: str, bd: Session = Depends(obtener_sesion_bd)):
 
     consulta = select(Gasolinera).join(Favorito, Gasolinera.id == Favorito.id_gasolinera).options(defer(Gasolinera.ubicacion_geometrica)).where(Favorito.id_dispositivo == id_usuario)
@@ -86,3 +87,62 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
         # Por si le damos sin querer dos veces y la gasolinera ya estaba guardada, tiramos hacia atras deshaciendo el error
         bd.rollback()
         return {"mensaje": "La Gasolinera ya estaba en tu lista"}
+
+@app.post(f"/alerta/gasolinera/", status_code=201)
+def crear_alerta_gasolinera(datos_entrada: AlertaPrecioInput, bd: Session = Depends(obtener_sesion_bd)):
+    gasolinera = bd.execute(select(Gasolinera).where(Gasolinera.id == datos_entrada.id_gasolinera)).scalar_one_or_none()
+
+    if not gasolinera:
+        raise HTTPException(status_code=404, detail="La gasolinera no existe")
+    
+    dispositivo = bd.execute(select(Dispositivo).where(Dispositivo.id == datos_entrada.id_dispositivo)).scalar_one_or_none()
+
+    if not dispositivo:
+        bd.add(Dispositivo(id=datos_entrada.id_dispositivo))
+        bd.commit()
+    
+    alerta = bd.execute(select(Alerta).where(Alerta.id_dispositivo == datos_entrada.id_dispositivo, Alerta.id_gasolinera == datos_entrada.id_gasolinera, Alerta.tipo_combustible == datos_entrada.tipo_combustible)).scalar_one_or_none()
+
+    if not alerta:
+        nueva_alerta = Alerta(
+            id_dispositivo=datos_entrada.id_dispositivo,
+            id_gasolinera=datos_entrada.id_gasolinera,
+            tipo_combustible=datos_entrada.tipo_combustible,
+            precio_objetivo=datos_entrada.precio_limite
+        )
+        bd.add(nueva_alerta)
+        bd.commit()
+
+
+
+    return {"mensaje": "Se ha creado la alerta correctamente"}
+
+@app.get("/favoritos/alertas/{id_gasolinera}")
+def obtener_alertas_usuario(id_telefono: str, id_gasolinera: str, bd: Session = Depends(obtener_sesion_bd)):
+    consulta = select(Alerta, Gasolinera).join(Gasolinera, Alerta.id_gasolinera == Gasolinera.id).where(Alerta.id_dispositivo == id_telefono, Alerta.id_gasolinera == id_gasolinera)
+
+    resultados = bd.execute(consulta).all()
+
+    lista_limpia = []
+    for alerta, gasolinera in resultados:
+        lista_limpia.append({
+            "id_alerta": alerta.id,
+            "tipo_combustible": alerta.tipo_combustible,
+            "precio_objetivo": alerta.precio_objetivo,
+            "nombre_gasolinera": gasolinera.nombre,
+            "direccion": gasolinera.direccion
+        })
+    
+    return lista_limpia
+
+@app.delete("/alerta_precio/{id_alerta}")
+def borrar_alerta(id_alerta: int, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
+    alerta_borrar = bd.execute(select(Alerta).where(Alerta.id == id_alerta, Alerta.id_dispositivo == id_dispositivo)).scalar_one_or_none()
+
+    if not alerta_borrar:
+        raise HTTPException(status_code=404, detail="La alerta no existe o no es tuya")
+    
+    bd.delete(alerta_borrar)
+    bd.commit()
+
+    return {"mensaje": "Alerta eliminada correctamente"}

@@ -1,6 +1,13 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, ForeignKey, Float, Boolean
 from app.db.database import Base
+from pydantic import BaseModel
+
+class AlertaPrecioInput(BaseModel):
+    id_dispositivo: str
+    id_gasolinera: str
+    tipo_combustible: str
+    precio_limite: float
 
 class Alerta(Base):
     __tablename__ = "alertas"
