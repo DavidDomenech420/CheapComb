@@ -1,10 +1,14 @@
 import time
 import schedule
+from sqlalchemy.orm import Session
+
+from app.db.database import motor
 
 from app.etl.extractor import obtener_datos_gobierno
 from app.etl.transformer import maquetar_json
 from app.db.database import inicializar_bd
 from app.etl.loader import cargar_gasolineras
+from app.etl.notifier import revisar_alertas_gasolinera
 
 def actualizar_datos_gasolineras():
     try:
@@ -15,6 +19,10 @@ def actualizar_datos_gasolineras():
         lista_gasolineras_limpia = maquetar_json(lista_gasolineras_raw)
 
         cargar_gasolineras(lista_gasolineras_limpia)
+
+        with Session(motor) as bd:
+            revisar_alertas_gasolinera(bd)
+
     except Exception as error:
         print(f"Error en la descarga de gasolineras: {error}")
 
@@ -28,5 +36,3 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending() # Miramos si es la hora de actualizar la base de datos, si no esperamos 1 minuto
         time.sleep(60)
-
-
