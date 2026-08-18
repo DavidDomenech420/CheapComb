@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 1. EL ALMACÉN (Base de datos con PostGIS)
+  db:
+    image: postgis/postgis:15-3.3
+    restart: always
+    environment:
+      # Portainer inyectará estos valores desde su interfaz web
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      # Esto asegura que si el servidor se reinicia, no pierdas las gasolineras guardadas
+      - postgres_data_cheapcomb:/var/lib/postgresql/data
+
+  # 2. EL MOSTRADOR (Tu API de FastAPI)
+  api:
+    build: .  # Le dice a Docker: "Busca el Dockerfile en esta misma carpeta y constrúyelo"
+    command: uvicorn api:app --host 0.0.0.0 --port 8000  # Sobrescribimos el comando para que levante la API
+    restart: always
+    ports:
+      - "8000:8000" # Exponemos el puerto para que internet pueda entrar
+    environment:
+      # Construimos la URL de conexión usando las mismas variables de arriba. 
+      # ¡Fíjate que el host ahora es 'db' (el nombre del servicio de arriba) y no 127.0.0.1!
+      URL_BASE_DATOS: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    depends_on:
+      - db
+
+  # 3. EL TRABAJADOR (Tu script en bucle infinito)
+  worker:
+    build: .  # Usa EXACTAMENTE la misma imagen de código que la API, ahorrando tiempo y memoria
+    command: python main.py  # Pero le damos una orden distinta: "Tú ejecuta el bucle ETL"
+    restart: always
+    environment:
+      URL_BASE_DATOS: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    depends_on:
+      - db
+
+volumes:
+  postgres_data_cheapcomb:
