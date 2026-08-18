@@ -1,7 +1,15 @@
+import os
+from dotenv import load_dotenv
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
-URL_CONEXION_BBDD = "postgresql://david_dom:Varc2369!@127.0.0.1:5432/registro_gasolineras_db"
+# Cargamos en memoria la informacion del .env
+load_dotenv()
+
+url_base_datos = os.getenv("URL_BASE_DATOS")
+
+URL_CONEXION_BBDD = url_base_datos
 motor = create_engine(URL_CONEXION_BBDD, echo=False)
 
 class Base(DeclarativeBase):
