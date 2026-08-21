@@ -13,6 +13,8 @@ services:
     volumes:
       # Esto asegura que si el servidor se reinicia, no pierdas las gasolineras guardadas
       - postgres_data_cheapcomb:/var/lib/postgresql/data
+    networks:
+      - proxy-net
 
   # 2. EL MOSTRADOR (Tu API de FastAPI)
   api:
