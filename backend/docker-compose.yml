@@ -19,14 +19,16 @@ services:
     build: .  # Le dice a Docker: "Busca el Dockerfile en esta misma carpeta y constrúyelo"
     command: uvicorn api:app --host 0.0.0.0 --port 8000  # Sobrescribimos el comando para que levante la API
     restart: always
-    ports:
-      - "8000:8000" # Exponemos el puerto para que internet pueda entrar
+    expose:
+      - "8000" # Exponemos el puerto para que internet pueda entrar
     environment:
       # Construimos la URL de conexión usando las mismas variables de arriba. 
       # ¡Fíjate que el host ahora es 'db' (el nombre del servicio de arriba) y no 127.0.0.1!
       URL_BASE_DATOS: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
       - db
+    networks:
+      - proxy-net
 
   # 3. EL TRABAJADOR (Tu script en bucle infinito)
   worker:
@@ -40,3 +42,7 @@ services:
 
 volumes:
   postgres_data_cheapcomb:
+
+networks:
+  proxy-net:
+    external: true
