@@ -22,7 +22,7 @@ services:
     command: uvicorn api:app --host 0.0.0.0 --port 8000  # Sobrescribimos el comando para que levante la API
     restart: always
     expose:
-      - "8000" # Exponemos el puerto para que internet pueda entrar
+      - "80" # Exponemos el puerto para que internet pueda entrar
     environment:
       # Construimos la URL de conexión usando las mismas variables de arriba. 
       # ¡Fíjate que el host ahora es 'db' (el nombre del servicio de arriba) y no 127.0.0.1!
