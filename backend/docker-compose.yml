@@ -27,6 +27,9 @@ services:
       # Construimos la URL de conexión usando las mismas variables de arriba. 
       # ¡Fíjate que el host ahora es 'db' (el nombre del servicio de arriba) y no 127.0.0.1!
       URL_BASE_DATOS: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - VIRTUAL_HOST=cheapcombapi.duckdns.org
+      - LETSENCRYPT_HOST=cheapcombapi.duckdns.org
+      - LETSENCRYPT_EMAIL=tuemail@dominio.com
     depends_on:
       - db
     networks:
