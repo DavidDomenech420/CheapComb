@@ -19,7 +19,7 @@ services:
   # 2. EL MOSTRADOR (Tu API de FastAPI)
   api:
     build: .  # Le dice a Docker: "Busca el Dockerfile en esta misma carpeta y constrúyelo"
-    command: uvicorn api:app --host 0.0.0.0 --port 8000  # Sobrescribimos el comando para que levante la API
+    command: uvicorn app.api.api:app --host 0.0.0.0 --port 8000  # Sobrescribimos el comando para que levante la API
     restart: always
     expose:
       - "80" # Exponemos el puerto para que internet pueda entrar
