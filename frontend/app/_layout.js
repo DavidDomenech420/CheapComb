@@ -26,7 +26,7 @@ export default function NavegacionInferior() {
                 name='favoritos'
                 options={{
                     title: 'Favoritas',
-                    tabBarIcon: ({color}) => <Ionicons name='heart' size={24} color={color} />,
+                    tabBarIcon: ({color}) => <Ionicons name='star' size={24} color={color} />,
                 }}
             />
         </Tabs>

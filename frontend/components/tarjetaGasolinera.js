@@ -12,7 +12,9 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                 {/* Informacion Gasolinera Basico */}
                 <View style={estilos.columnaIzquierda}>
                     <View style={estilos.filaTitulo}>
-                        <Text style={estilos.titulo}>⭐</Text>
+                        <TouchableOpacity>
+                            <Text style={estilos.iconoEstrella}>⭐</Text>
+                        </TouchableOpacity>
                         <Text style={estilos.titulo}>{datosGasolinera.nombre}</Text>
                     </View>
                     <Text style={estilos.textoSecundario}>{datosGasolinera.direccion}, {datosGasolinera.municipio}</Text>
@@ -100,7 +102,9 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
 const estilos = StyleSheet.create({
     tarjeta: {
         backgroundColor: Colores.fondoTargeta,
-        padding: 10,
+        padding: 8,
+        paddingTop: 10,
+        paddingBottom: 10,
         margin: 20,
         borderWidth: 2,
         borderRadius: 8,
@@ -109,8 +113,11 @@ const estilos = StyleSheet.create({
     },
     titulo: {
         color: Colores.textoClaro,
-        fontSize: 20,
+        fontSize: 17,
         fontWeight: 'bold'
+    },
+    iconoEstrella: {
+        fontSize: 20
     },
     textoSecundario: { 
         color: Colores.textoClaro,
@@ -140,7 +147,7 @@ const estilos = StyleSheet.create({
     },
     columnaIzquierda: {
         flex: 1, 
-        marginRight: 15,
+        marginRight: 20,
     },
     columnaDerecha: {
         alignItems: 'flex-end',
@@ -155,7 +162,7 @@ const estilos = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center', // Centra la estrella y el texto verticalmente
         marginBottom: 8,
-        gap: 10,
+        gap: 8,
     },
 
     // LA MAGIA DE LA PASTILLA

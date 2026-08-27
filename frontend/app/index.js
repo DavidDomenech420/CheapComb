@@ -1,20 +1,54 @@
-import {View, Text, StyleSheet, FlatList, LayoutAnimation} from 'react-native'
-import { useState } from "react";
+import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} from 'react-native'
+import { useEffect, useState } from "react";
+import * as Location from 'expo-location';
 
 import { Colores } from "../src/theme";
 
 import TarjetaGasolinera  from "../components/tarjetaGasolinera";
 
-const GASOLINERAS_PRUEBA = [
-    {id: '1', nombre: 'Escatoil', municipio: 'Reus', direccion: 'Avinguda Carrilet', horario: 'L-D 24h', precio_gasolina_95_e5: 1.567, precio_gasoleo_a: 1.669, precio_gasolina_98_e5: null, precio_gasoleo_premium: null, precio_gases_licuados_petroleo: null},
-    {id: '2', nombre: 'Repsol', municipio: 'Cambrils', direccion: 'Calle Argentina', horario: 'L-S 9:00-18:00', precio_gasolina_95_e5: 1.748, precio_gasoleo_a: 1.953, precio_gasolina_98_e5: null, precio_gasoleo_premium: 2.124, precio_gases_licuados_petroleo: null},
-]
-
-
 export default function PantallaInicio() {
+    const [gasolinerasCercanas, setGasolinerasCercanas] = useState([]);
+    const [cargandoDatos, setCargandoDatos] = useState(true)
 
     // Guardamos el ID de la tarjeta que esta abierta actualmente
     const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
+
+    useEffect(() => {
+        
+        const obtenerPermisoYUbicacion = async () => {
+            try {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+
+                if (status !== 'granted') {
+                    console.log("Se ha denegado el permiso para la ubicacion");
+                    setCargandoDatos(false);
+                    return;
+                }
+
+                const ubicacionActual = await Location.getCurrentPositionAsync({});
+                obtenerDatosServidor(ubicacionActual.coords.latitude, ubicacionActual.coords.longitude)
+            } catch (error) {
+                
+            }
+        }
+
+        
+
+        const obtenerDatosServidor = async (latitud, longitud) => {
+            try {                
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}`);
+                const datosMaquetados = await respuesta.json()
+                setGasolinerasCercanas(datosMaquetados)
+            } catch (error) {
+                console.error("Ha habido un error descargando los datos de la API: " + error);
+                
+            } finally {
+                setCargandoDatos(false)
+            }
+
+        }
+        obtenerPermisoYUbicacion()
+    }, [])
 
     const manejarAbrirGasolinera = (id) => {
         // Preparamos la animacion
@@ -36,10 +70,19 @@ export default function PantallaInicio() {
         />
     )
 
+    if (cargandoDatos) {
+        return (
+            <View style={estilos.contenedor}>
+                <ActivityIndicator size="large" color="#2e7d32" />
+                <Text style={estilos.titulo}>Buscando Gasolineras...</Text>
+            </View>
+        );
+    }
+
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
-            <FlatList data={GASOLINERAS_PRUEBA} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
+            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
         </View>
     );
 }
@@ -51,5 +94,9 @@ const estilos = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: Colores.fondo
     },
-    
+    titulo: {
+        color: Colores.textoClaro,
+        fontSize: 20,
+        fontWeight: 'bold'
+    },
 });
