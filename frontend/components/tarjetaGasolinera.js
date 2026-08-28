@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons"
-import DeviceInfo from 'react-native-device-info'
+import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
@@ -13,7 +13,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
         setFavorito(!favorito);
         !favorito ? ToastAndroid.show(`${datosGasolinera.nombre} se ha añadido a favoritos`, ToastAndroid.SHORT): ToastAndroid.show(`${datosGasolinera.nombre} se ha eliminado de favoritos`, ToastAndroid.SHORT)
 
-        const idUsuario = await DeviceInfo.getUniqueId()
+        const idUsuario = await Application.getAndroidId()
 
         if (!favorito) {
             try {
