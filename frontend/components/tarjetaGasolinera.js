@@ -1,10 +1,64 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid } from "react-native";
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons"
+import DeviceInfo from 'react-native-device-info'
 
 import { Colores } from "../src/theme";
 
-
 export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable }) {
 
+    const [favorito, setFavorito] = useState(false);
+
+    const alternarFavorito = async () => {
+        setFavorito(!favorito);
+        !favorito ? ToastAndroid.show(`${datosGasolinera.nombre} se ha añadido a favoritos`, ToastAndroid.SHORT): ToastAndroid.show(`${datosGasolinera.nombre} se ha eliminado de favoritos`, ToastAndroid.SHORT)
+
+        const idUsuario = await DeviceInfo.getUniqueId()
+
+        if (!favorito) {
+            try {
+                const datosFav = {
+                    id_usuario: idUsuario,
+                    id_gasolinera: datosGasolinera.id
+                }
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datosFav)
+                });
+
+                if (!respuesta.ok) {
+                    ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
+                    setFavorito(favorito)
+                }
+            } catch (error) {
+                ToastAndroid.show(`Error de red al intentar conectarse: ${error}`, ToastAndroid.SHORT)
+                
+            }
+        } else {
+            try {
+                const datosFav = {
+                    id_dispositivo: idUsuario
+                }
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/${datosGasolinera.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json', // Le decimos a la API qué tipo de dato enviamos
+                    },
+                    body: JSON.stringify(datosFav)
+                })
+                if (!respuesta.ok) {
+                    ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
+                    setFavorito(favorito)
+                }
+            } catch (error) {
+                ToastAndroid.show(`Error de red al intentar conectarse: ${error}`, ToastAndroid.SHORT)
+                
+            }
+        }
+    }
     return (
         <View style={estilos.tarjeta}>
             {/* Seccion Superior */}
@@ -12,8 +66,8 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                 {/* Informacion Gasolinera Basico */}
                 <View style={estilos.columnaIzquierda}>
                     <View style={estilos.filaTitulo}>
-                        <TouchableOpacity>
-                            <Text style={estilos.iconoEstrella}>⭐</Text>
+                        <TouchableOpacity onPress={alternarFavorito}>
+                            <Text style={estilos.iconoEstrella}>{favorito ? <Ionicons name='star'size={20} color='yellow' /> : <Ionicons name='star-outline' size={20} color={Colores.textoClaro} />}</Text>
                         </TouchableOpacity>
                         <Text style={estilos.titulo}>{datosGasolinera.nombre}</Text>
                     </View>

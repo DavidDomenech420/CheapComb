@@ -88,6 +88,18 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
         bd.rollback()
         return {"mensaje": "La Gasolinera ya estaba en tu lista"}
 
+@app.delete("/gasolineras_favoritas/{id_gasolinera}")
+def borrar_alerta(id_gasolinera: int, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
+    favorito_borrar = bd.execute(select(Favorito).where(Gasolinera.id == id_gasolinera, Dispositivo.id_dispositivo == id_dispositivo)).scalar_one_or_none()
+
+    if not favorito_borrar:
+        raise HTTPException(status_code=404, detail="La alerta no existe o no es tuya")
+    
+    bd.delete(favorito_borrar)
+    bd.commit()
+
+    return {"mensaje": "Alerta eliminada correctamente"}
+
 @app.post(f"/alerta/gasolinera/", status_code=201)
 def crear_alerta_gasolinera(datos_entrada: AlertaPrecioInput, bd: Session = Depends(obtener_sesion_bd)):
     gasolinera = bd.execute(select(Gasolinera).where(Gasolinera.id == datos_entrada.id_gasolinera)).scalar_one_or_none()
