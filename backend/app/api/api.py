@@ -90,7 +90,7 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
 
 @app.delete("/gasolineras_favoritas/{id_gasolinera}")
 def borrar_favorito(id_gasolinera: int, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
-    favorito_borrar = bd.execute(select(Favorito).where(Gasolinera.id == id_gasolinera, Dispositivo.id_dispositivo == id_dispositivo)).scalar_one_or_none()
+    favorito_borrar = bd.execute(select(Favorito).where(Gasolinera.id == id_gasolinera, Dispositivo.id == id_dispositivo)).scalar_one_or_none()
 
     if not favorito_borrar:
         raise HTTPException(status_code=404, detail="El favorito no existe o no es tuyo")

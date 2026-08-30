@@ -5,9 +5,9 @@ import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
-export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable }) {
+export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable, gasolineraFav }) {
 
-    const [favorito, setFavorito] = useState(false);
+    const [favorito, setFavorito] = useState(gasolineraFav);
 
     const alternarFavorito = async () => {
         setFavorito(!favorito);
@@ -39,15 +39,9 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
             }
         } else {
             try {
-                const datosFav = {
-                    id_dispositivo: idUsuario
-                }
-                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/${datosGasolinera.id}`, {
+                const id_gasolinera = datosGasolinera.id
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/${id_gasolinera}?id_dispositivo=${idUsuario}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json', // Le decimos a la API qué tipo de dato enviamos
-                    },
-                    body: JSON.stringify(datosFav)
                 })
                 if (!respuesta.ok) {
                     ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)

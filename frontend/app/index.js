@@ -1,6 +1,7 @@
 import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} from 'react-native'
 import { useEffect, useState } from "react";
 import * as Location from 'expo-location';
+import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
@@ -8,6 +9,7 @@ import TarjetaGasolinera  from "../components/tarjetaGasolinera";
 
 export default function PantallaInicio() {
     const [gasolinerasCercanas, setGasolinerasCercanas] = useState([]);
+    const [gasolinerasFavoritas, setGasolinerasFavoritas] = useState([])
     const [cargandoDatos, setCargandoDatos] = useState(true)
 
     // Guardamos el ID de la tarjeta que esta abierta actualmente
@@ -36,9 +38,15 @@ export default function PantallaInicio() {
 
         const obtenerDatosServidor = async (latitud, longitud) => {
             try {                
+                const idUsuario = await Application.getAndroidId()
                 const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}`);
                 const datosMaquetados = await respuesta.json()
                 setGasolinerasCercanas(datosMaquetados)
+
+                const gasolinerasFavoritasRaw = await fetch(`https://cheapcombapi.duckdns.org/favoritos/${idUsuario}`);
+                const favoritos = await gasolinerasFavoritasRaw.json()
+                setGasolinerasFavoritas(favoritos)
+
             } catch (error) {
                 console.error("Ha habido un error descargando los datos de la API: " + error);
                 
@@ -66,7 +74,9 @@ export default function PantallaInicio() {
         <TarjetaGasolinera 
             datosGasolinera={item}
             abierta={idGasolineraAbierta === item.id}
-            alternarDesplegable={() => manejarAbrirGasolinera(item.id)}
+            alternarDesplegable={() => manejarAbrirGasolinera(item.id)
+            }
+            gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id_gasolinera === item.id)}
         />
     )
 
