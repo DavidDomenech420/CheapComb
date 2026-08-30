@@ -89,7 +89,7 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
         return {"mensaje": "La Gasolinera ya estaba en tu lista"}
 
 @app.delete("/gasolineras_favoritas/{id_gasolinera}")
-def borrar_favorito(id_gasolinera: int, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
+def borrar_favorito(id_gasolinera: str, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
     favorito_borrar = bd.execute(select(Favorito).where(Favorito.id_gasolinera == id_gasolinera, Favorito.id_dispositivo == id_dispositivo)).scalar_one_or_none()
 
     if not favorito_borrar:
