@@ -1,21 +1,26 @@
 import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons"
 import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
-export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable, gasolineraFav }) {
+export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable, gasolineraFav, paginaFavorito, quitarFav }) {
 
     const [favorito, setFavorito] = useState(gasolineraFav);
 
+    useEffect(() => {
+        setFavorito(gasolineraFav)
+    }, [gasolineraFav])
+
     const alternarFavorito = async () => {
-        setFavorito(!favorito);
-        !favorito ? ToastAndroid.show(`${datosGasolinera.nombre} se ha añadido a favoritos`, ToastAndroid.SHORT): ToastAndroid.show(`${datosGasolinera.nombre} se ha eliminado de favoritos`, ToastAndroid.SHORT)
+        const nuevoEstado = !favorito
+        setFavorito(nuevoEstado);
+        nuevoEstado ? ToastAndroid.show(`${datosGasolinera.nombre} se ha añadido a favoritos`, ToastAndroid.SHORT): ToastAndroid.show(`${datosGasolinera.nombre} se ha eliminado de favoritos`, ToastAndroid.SHORT)
 
-        const idUsuario = await Application.getAndroidId()
+        const idUsuario = Application.getAndroidId()
 
-        if (!favorito) {
+        if (nuevoEstado) {
             try {
                 const datosFav = {
                     id_usuario: idUsuario,
@@ -31,7 +36,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
 
                 if (!respuesta.ok) {
                     ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
-                    setFavorito(favorito)
+                    setFavorito(!nuevoEstado)
                 }
             } catch (error) {
                 ToastAndroid.show(`Error de red al intentar conectarse: ${error}`, ToastAndroid.SHORT)
@@ -45,7 +50,12 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                 })
                 if (!respuesta.ok) {
                     ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
-                    setFavorito(favorito)
+                    setFavorito(!nuevoEstado)
+                }
+                else {
+                    if (quitarFav) {
+                        quitarFav(datosGasolinera.id)
+                    }
                 }
             } catch (error) {
                 ToastAndroid.show(`Error de red al intentar conectarse: ${error}`, ToastAndroid.SHORT)
@@ -65,6 +75,11 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                         </TouchableOpacity>
                         <Text style={estilos.titulo}>{datosGasolinera.nombre}</Text>
                     </View>
+                    {paginaFavorito && (
+                        <TouchableOpacity>
+                            <Ionicons name='notifications' size={20} color='yellow' />
+                        </TouchableOpacity>
+                    )}
                     <Text style={estilos.textoSecundario}>{datosGasolinera.direccion}, {datosGasolinera.municipio}</Text>
                     <Text style={estilos.textoSecundario}>{datosGasolinera.horario}</Text>
                 </View>

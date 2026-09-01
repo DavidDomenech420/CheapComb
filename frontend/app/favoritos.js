@@ -1,24 +1,86 @@
-import {View, Text, StyleSheet, FlatList} from 'react-native'
+import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} from 'react-native'
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from 'expo-router';
+import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
-const GASOLINERAS_PRUEBA = [
-    {id: '1', nombre: 'Escatoil', municipio: 'Reus', direccion: 'Avinguda Carrilet', horario: 'L-D 24h', precio_gasolina_95_e5: 1.567, precio_gasoleo_a: 1.669, precio_gasolina_98_e5: null, precio_gasoleo_premium: null, precio_gases_licuados_petroleo: null},
-    {id: '2', nombre: 'Repsol', municipio: 'Cambrils', direccion: 'Calle Argentina', horario: 'L-S 9:00-18:00', precio_gasolina_95_e5: 1.748, precio_gasoleo_a: 1.953, precio_gasolina_98_e5: null, precio_gasoleo_premium: null, precio_gases_licuados_petroleo: null},
-]
+import TarjetaGasolinera  from "../components/tarjetaGasolinera";
 
-export default function PantallaFavoritos() {
+export default function PantallaFavorito() {
+    const [gasolinerasFavoritas, setGasolinerasFavoritas] = useState([])
+    const [cargandoDatos, setCargandoDatos] = useState(true)
 
-    const pintarGasolinera = ({item}) => (
-        <View>
+    // Guardamos el ID de la tarjeta que esta abierta actualmente
+    const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
 
-        </View>
+    useFocusEffect(
+        useCallback(() => {
+    
+            const obtenerDatosServidor = async () => {
+                try {                
+                    const idUsuario = Application.getAndroidId()
+    
+                    const gasolinerasFavoritasRaw = await fetch(`https://cheapcombapi.duckdns.org/favoritos/${idUsuario}`);
+                    const favoritos = await gasolinerasFavoritasRaw.json()
+                    setGasolinerasFavoritas(favoritos)
+    
+                } catch (error) {
+                    console.error("Ha habido un error descargando los datos de la API: " + error);
+                    
+                } finally {
+                    setCargandoDatos(false)
+                }
+    
+            }
+            obtenerDatosServidor()
+        }, [])
     )
 
+    const manejarAbrirGasolinera = (id) => {
+        // Preparamos la animacion
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+        if (idGasolineraAbierta === id) {
+            setIdGasolineraAbierta(null);
+        }
+        else {
+            setIdGasolineraAbierta(id);
+        }
+    }
+
+    const pintarGasolinera = ({item}) => (
+        <TarjetaGasolinera 
+            datosGasolinera={item}
+            abierta={idGasolineraAbierta === item.id}
+            alternarDesplegable={() => manejarAbrirGasolinera(item.id)
+            }
+            gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id == item.id)}
+            paginaFavorito={true}
+            quitarFav={eliminarFavoritoPantalla}
+        />
+    )
+
+    if (cargandoDatos) {
+        return (
+            <View style={estilos.contenedor}>
+                <ActivityIndicator size="large" color="#2e7d32" />
+                <Text style={estilos.titulo}>Buscando Gasolineras...</Text>
+            </View>
+        );
+    }
+    const eliminarFavoritoPantalla = (idGasolineraFav) => {
+        const listaActualizada = gasolinerasFavoritas.filter(
+            (gasolinera) => gasolinera.id !== idGasolineraFav
+        );
+
+        setGasolinerasFavoritas(listaActualizada)
+    }
+    
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
-            <Text style={estilos.titulo}>Lista de Gasolineras Favoritas (Proximamente)</Text>
+            <FlatList data={gasolinerasFavoritas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
         </View>
     );
 }
@@ -30,16 +92,9 @@ const estilos = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: Colores.fondo
     },
-    targeta: {
-        backgroundColor: Colores.fondoTargeta,
-        padding: 20,
-        margin: 10,
-        borderRadius: 8,
-        borderColor: Colores.bordeTargeta
-    },
     titulo: {
         color: Colores.textoClaro,
         fontSize: 20,
         fontWeight: 'bold'
-    }
+    },
 });

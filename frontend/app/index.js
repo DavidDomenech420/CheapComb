@@ -1,5 +1,6 @@
 import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} from 'react-native'
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import * as Location from 'expo-location';
 import * as Application from 'expo-application'
 
@@ -15,8 +16,31 @@ export default function PantallaInicio() {
     // Guardamos el ID de la tarjeta que esta abierta actualmente
     const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
 
+    useFocusEffect(
+        useCallback(() => {
+            const obtenerGasolinerasFav = async () => {
+                try {
+                    const idUsuario = Application.getAndroidId()
+                    const gasolinerasFavoritasRaw = await fetch(`https://cheapcombapi.duckdns.org/favoritos/${idUsuario}?tiempo=${Date.now()}`);
+                    const favoritos = await gasolinerasFavoritasRaw.json()
+                    setGasolinerasFavoritas(favoritos)
+                    console.log(favoritos);
+                    
+                } catch (error) {
+                    console.error("Ha habido un error descargando los datos de la API: " + error);
+                }
+            }
+
+            obtenerGasolinerasFav()
+        }, [])
+    )
+
     useEffect(() => {
         
+        let suscripcionRadar = null; // Variable para guardar la conexion con el radar
+
+
+
         const obtenerPermisoYUbicacion = async () => {
             try {
                 const { status } = await Location.requestForegroundPermissionsAsync();
@@ -27,8 +51,16 @@ export default function PantallaInicio() {
                     return;
                 }
 
-                const ubicacionActual = await Location.getCurrentPositionAsync({});
-                obtenerDatosServidor(ubicacionActual.coords.latitude, ubicacionActual.coords.longitude)
+                suscripcionRadar = await Location.watchPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                    distanceInterval: 500,
+                    timeInterval: 60000,
+                },
+                // Funcion que se llama cada vez que actualizamos radar
+                (ubicacionActualizada) => {
+                    obtenerDatosServidor(ubicacionActualizada.coords.latitude, ubicacionActualizada.coords.longitude)
+                }
+            )
             } catch (error) {
                 
             }
@@ -38,14 +70,10 @@ export default function PantallaInicio() {
 
         const obtenerDatosServidor = async (latitud, longitud) => {
             try {                
-                const idUsuario = await Application.getAndroidId()
                 const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}`);
                 const datosMaquetados = await respuesta.json()
                 setGasolinerasCercanas(datosMaquetados)
 
-                const gasolinerasFavoritasRaw = await fetch(`https://cheapcombapi.duckdns.org/favoritos/${idUsuario}`);
-                const favoritos = await gasolinerasFavoritasRaw.json()
-                setGasolinerasFavoritas(favoritos)
 
             } catch (error) {
                 console.error("Ha habido un error descargando los datos de la API: " + error);
@@ -56,6 +84,14 @@ export default function PantallaInicio() {
 
         }
         obtenerPermisoYUbicacion()
+
+        // React ejecuta el return justo antes de destruir el componente.
+
+        return () => {
+            if (suscripcionRadar) {
+                suscripcionRadar.remove()
+            }
+        }
     }, [])
 
     const manejarAbrirGasolinera = (id) => {
@@ -76,7 +112,8 @@ export default function PantallaInicio() {
             abierta={idGasolineraAbierta === item.id}
             alternarDesplegable={() => manejarAbrirGasolinera(item.id)
             }
-            gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id_gasolinera === item.id)}
+            gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id == item.id)}
+            paginaFavorito={false}
         />
     )
 
@@ -88,11 +125,11 @@ export default function PantallaInicio() {
             </View>
         );
     }
-
+    
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
-            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
+            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} extraData={gasolinerasFavoritas} />
         </View>
     );
 }
