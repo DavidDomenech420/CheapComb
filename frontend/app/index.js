@@ -16,6 +16,8 @@ export default function PantallaInicio() {
     // Guardamos el ID de la tarjeta que esta abierta actualmente
     const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
 
+    const [relojJefe, setRelojJefe] = useState(Date.now());
+
     useFocusEffect(
         useCallback(() => {
             const obtenerGasolinerasFav = async () => {
@@ -24,7 +26,7 @@ export default function PantallaInicio() {
                     const gasolinerasFavoritasRaw = await fetch(`https://cheapcombapi.duckdns.org/favoritos/${idUsuario}?tiempo=${Date.now()}`);
                     const favoritos = await gasolinerasFavoritasRaw.json()
                     setGasolinerasFavoritas(favoritos)
-                    console.log(favoritos);
+                    setRelojJefe(Date.now())
                     
                 } catch (error) {
                     console.error("Ha habido un error descargando los datos de la API: " + error);
@@ -114,6 +116,7 @@ export default function PantallaInicio() {
             }
             gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id == item.id)}
             paginaFavorito={false}
+            actualizacion={relojJefe}
         />
     )
 
@@ -129,7 +132,7 @@ export default function PantallaInicio() {
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
-            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} extraData={gasolinerasFavoritas} />
+            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} extraData={relojJefe} />
         </View>
     );
 }

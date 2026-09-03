@@ -1,17 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid, Linking } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons"
 import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
-export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable, gasolineraFav, paginaFavorito, quitarFav }) {
+export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDesplegable, gasolineraFav, paginaFavorito, quitarFav, actualizacion, abrirAlertasFav }) {
 
     const [favorito, setFavorito] = useState(gasolineraFav);
 
     useEffect(() => {
         setFavorito(gasolineraFav)
-    }, [gasolineraFav])
+    }, [gasolineraFav, actualizacion])
 
     const alternarFavorito = async () => {
         const nuevoEstado = !favorito
@@ -63,6 +63,16 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
             }
         }
     }
+
+    const abrirAlertas = () => {
+        if (abrirAlertasFav) {
+            abrirAlertasFav(datosGasolinera.id)
+        }
+    }
+
+    const navegarDestinoGasolinera = () => {
+        Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${datosGasolinera.latitud},${datosGasolinera.longitud}`)
+    }
     return (
         <View style={estilos.tarjeta}>
             {/* Seccion Superior */}
@@ -76,7 +86,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                         <Text style={estilos.titulo}>{datosGasolinera.nombre}</Text>
                     </View>
                     {paginaFavorito && (
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={abrirAlertasFav}>
                             <Ionicons name='notifications' size={20} color='yellow' />
                         </TouchableOpacity>
                     )}
@@ -151,7 +161,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
             )}
             {/* Pie de tarjeta */}
             <View style={estilos.pieTarjeta}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={navegarDestinoGasolinera}>
                     <Text style={estilos.enlaceAccion}>Como llegar →</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={alternarDesplegable}>

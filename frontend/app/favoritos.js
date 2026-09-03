@@ -5,6 +5,7 @@ import * as Application from 'expo-application'
 
 import { Colores } from "../src/theme";
 
+import ModalAlertas from '../components/modalAlertas';
 import TarjetaGasolinera  from "../components/tarjetaGasolinera";
 
 export default function PantallaFavorito() {
@@ -14,6 +15,11 @@ export default function PantallaFavorito() {
     // Guardamos el ID de la tarjeta que esta abierta actualmente
     const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
 
+    // Guardamos el ID de la gasolinera que queremos ver las alertas
+    const [idGasolineraAlertas, setIdGasolineraAlertas] = useState(null)
+    const [popUpAlertasAbierto, setPopUpAlertasAbierto] = useState(false)
+
+    // Funciones 
     useFocusEffect(
         useCallback(() => {
     
@@ -49,6 +55,22 @@ export default function PantallaFavorito() {
         }
     }
 
+    const eliminarFavoritoPantalla = (idGasolineraFav) => {
+        const listaActualizada = gasolinerasFavoritas.filter(
+            (gasolinera) => gasolinera.id !== idGasolineraFav
+        );
+
+        setGasolinerasFavoritas(listaActualizada)
+    }
+
+    const abrirAlertasGasolinera = (idGasolineraFav) => {
+        setIdGasolineraAlertas(idGasolineraFav)
+        setPopUpAlertasAbierto(true)
+    }
+
+
+    // Zona Visual
+
     const pintarGasolinera = ({item}) => (
         <TarjetaGasolinera 
             datosGasolinera={item}
@@ -58,6 +80,7 @@ export default function PantallaFavorito() {
             gasolineraFav={gasolinerasFavoritas.some((favorito) => favorito.id == item.id)}
             paginaFavorito={true}
             quitarFav={eliminarFavoritoPantalla}
+            abrirAlertasFav={abrirAlertasGasolinera}
         />
     )
 
@@ -69,17 +92,16 @@ export default function PantallaFavorito() {
             </View>
         );
     }
-    const eliminarFavoritoPantalla = (idGasolineraFav) => {
-        const listaActualizada = gasolinerasFavoritas.filter(
-            (gasolinera) => gasolinera.id !== idGasolineraFav
-        );
-
-        setGasolinerasFavoritas(listaActualizada)
-    }
     
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
+            <ModalAlertas 
+                visible={popUpAlertasAbierto}
+                cerrarModal={() => setPopUpAlertasAbierto(false)}
+                idGasolinera={idGasolineraAlertas}
+                idUsuario={Application.getAndroidId()}
+            />
             <FlatList data={gasolinerasFavoritas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
         </View>
     );
