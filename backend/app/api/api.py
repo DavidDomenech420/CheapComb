@@ -129,7 +129,7 @@ def crear_alerta_gasolinera(datos_entrada: AlertaPrecioInput, bd: Session = Depe
 
     return {"mensaje": "Se ha creado la alerta correctamente"}
 
-@app.get("/favoritos/alertas/{id_gasolinera}")
+@app.get("/favoritos/alertas/{id_telefono}/{id_gasolinera}")
 def obtener_alertas_usuario(id_telefono: str, id_gasolinera: str, bd: Session = Depends(obtener_sesion_bd)):
     consulta = select(Alerta, Gasolinera).join(Gasolinera, Alerta.id_gasolinera == Gasolinera.id).where(Alerta.id_dispositivo == id_telefono, Alerta.id_gasolinera == id_gasolinera)
 
