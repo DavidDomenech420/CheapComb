@@ -18,6 +18,10 @@ export default function PantallaInicio() {
 
     const [relojJefe, setRelojJefe] = useState(Date.now());
 
+    // TODO: Si no hay gasolineras cerca poner un texto indicando que no hay gasolineras para cargar
+
+    // TODO: Hacer que aparezcan gasolineras de 10 en 10, y si estamos al final de la lista carguen los otros 10
+
     useFocusEffect(
         useCallback(() => {
             const obtenerGasolinerasFav = async () => {

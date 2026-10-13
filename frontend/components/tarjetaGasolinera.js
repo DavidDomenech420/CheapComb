@@ -86,7 +86,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
                         <Text style={estilos.titulo}>{datosGasolinera.nombre}</Text>
                     </View>
                     {paginaFavorito && (
-                        <TouchableOpacity onPress={abrirAlertasFav}>
+                        <TouchableOpacity onPress={() => abrirAlertasFav(datosGasolinera.id)}>
                             <Ionicons name='notifications' size={20} color='yellow' />
                         </TouchableOpacity>
                     )}

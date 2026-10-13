@@ -12,5 +12,6 @@ export const Colores = {
     inactivo: '#b0bec5',
     precioEconomicoTexto: '#42C946',
     fondoPastilla: '#05508E',
-    fondoPopUp: '#404040'
+    fondoPopUp: '#404040',
+    eliminar: '#E54545'
 };

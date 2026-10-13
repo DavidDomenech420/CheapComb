@@ -23,7 +23,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-location"
+      "expo-location",
+      "expo-status-bar"
     ]
   }
 }

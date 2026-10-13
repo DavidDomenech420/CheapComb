@@ -8,6 +8,10 @@ import { Colores } from "../src/theme";
 import ModalAlertas from '../components/modalAlertas';
 import TarjetaGasolinera  from "../components/tarjetaGasolinera";
 
+// TODO: Si no hay favoritos poner un texto indicando que no hay favoritos para cargar
+
+// TODO: Hacer que aparezcan gasolineras de 10 en 10, y si estamos al final de la lista carguen los otros 10
+
 export default function PantallaFavorito() {
     const [gasolinerasFavoritas, setGasolinerasFavoritas] = useState([])
     const [cargandoDatos, setCargandoDatos] = useState(true)
