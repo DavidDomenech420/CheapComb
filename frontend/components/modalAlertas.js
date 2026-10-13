@@ -154,7 +154,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
                                 <Text style={estilos.titulo} >Alerta Esclatoil - Reus</Text>
                             </View>
                             <View style={estilos.zonaAlertaCreada}>
-                                <FlatList data={alertas} keyExtractor={(item) => item.id} renderItem={pintarAlerta} showsVerticalScrollIndicator={true} style={{maxHeight: 80}}
+                                <FlatList data={alertas} keyExtractor={(item) => item.id_alerta} renderItem={pintarAlerta} showsVerticalScrollIndicator={true} style={{maxHeight: 80}}
                                 ListEmptyComponent={
                                     <Text style={estilos.textoVacio}>No hay ninguna alerta para esta gasolinera.</Text>
                                 }/>
