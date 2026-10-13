@@ -52,7 +52,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
 
         try {
             const creacionAlerta = {
-                "id_dispositivo": String(idUsuario), 
+                "id_usuario": String(idUsuario), 
                 "id_gasolinera": String(idGasolinera), 
                 "tipo_combustible": opcionesCombustible.find(combustible => combustible.id === idSeleccionado).nombre,
                 "precio_limite": precioFinal

@@ -10,5 +10,5 @@ class GasolineraGuardadaInput (BaseModel):
 class Favorito(Base):
     __tablename__ = "favoritos"
 
-    id_dispositivo: Mapped[str] = mapped_column(ForeignKey("dispositivos.id"), primary_key=True)
+    id_usuario: Mapped[str] = mapped_column(ForeignKey("usuarios.id"), primary_key=True)
     id_gasolinera: Mapped[str] = mapped_column(ForeignKey("gasolineras.id"), primary_key=True)

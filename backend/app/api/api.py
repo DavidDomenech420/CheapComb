@@ -8,7 +8,7 @@ from geoalchemy2.functions import ST_DWithin
 from app.db.database import motor
 from app.db.modelos.gasolinera import Gasolinera
 from app.db.modelos.favorito import Favorito, GasolineraGuardadaInput
-from app.db.modelos.dispositivo import Dispositivo
+from app.db.modelos.usuario import Usuario
 from app.db.modelos.alerta import Alerta, AlertaPrecioInput
 
 # Inicializamos la app de FastAPI
@@ -45,7 +45,7 @@ def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), ra
 @app.get("/favoritos/{id_usuario}")
 def obtener_gasolineras_favoritas(id_usuario: str, bd: Session = Depends(obtener_sesion_bd)):
 
-    consulta = select(Gasolinera).join(Favorito, Gasolinera.id == Favorito.id_gasolinera).options(defer(Gasolinera.ubicacion_geometrica)).where(Favorito.id_dispositivo == id_usuario)
+    consulta = select(Gasolinera).join(Favorito, Gasolinera.id == Favorito.id_gasolinera).options(defer(Gasolinera.ubicacion_geometrica)).where(Favorito.id_usuario == id_usuario)
 
     lista_gasolinera = bd.execute(consulta).scalars().all()
 
@@ -65,17 +65,17 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
     
     # Miramos si existe el usuario (Ha guardado algo anteriormente), si no existe lo creamos automaticamente
 
-    dispositivo = bd.execute(select(Dispositivo).where(Dispositivo.id == datos_entrada.id_usuario)).scalar_one_or_none()
+    usuario = bd.execute(select(Usuario).where(Usuario.id == datos_entrada.id_usuario)).scalar_one_or_none()
     
-    if not dispositivo:
-        nuevo_dispositivo = Dispositivo(id=datos_entrada.id_usuario)
-        bd.add(nuevo_dispositivo)
+    if not usuario:
+        nuevo_usuario = Usuario(id=datos_entrada.id_usuario)
+        bd.add(nuevo_usuario)
         bd.commit()
     
     # Creamos el favorito
     nuevo_favorito = Favorito(
         id_gasolinera=datos_entrada.id_gasolinera,
-        id_dispositivo=datos_entrada.id_usuario
+        id_usuario=datos_entrada.id_usuario
     )
 
     # Guardamos el favorito en la base de datos
@@ -89,8 +89,8 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
         return {"mensaje": "La Gasolinera ya estaba en tu lista"}
 
 @app.delete("/gasolineras_favoritas/{id_gasolinera}")
-def borrar_favorito(id_gasolinera: str, id_dispositivo: str, bd: Session = Depends(obtener_sesion_bd)):
-    favorito_borrar = bd.execute(select(Favorito).where(Favorito.id_gasolinera == id_gasolinera, Favorito.id_dispositivo == id_dispositivo)).scalar_one_or_none()
+def borrar_favorito(id_gasolinera: str, id_usuario: str, bd: Session = Depends(obtener_sesion_bd)):
+    favorito_borrar = bd.execute(select(Favorito).where(Favorito.id_gasolinera == id_gasolinera, Favorito.id_usuario == id_usuario)).scalar_one_or_none()
 
     if not favorito_borrar:
         raise HTTPException(status_code=404, detail="El favorito no existe o no es tuyo")
@@ -107,17 +107,17 @@ def crear_alerta_gasolinera(datos_entrada: AlertaPrecioInput, bd: Session = Depe
     if not gasolinera:
         raise HTTPException(status_code=404, detail="La gasolinera no existe")
     
-    dispositivo = bd.execute(select(Dispositivo).where(Dispositivo.id == datos_entrada.id_dispositivo)).scalar_one_or_none()
+    usuario = bd.execute(select(Usuario).where(Usuario.id == datos_entrada.id_usuario)).scalar_one_or_none()
 
-    if not dispositivo:
-        bd.add(Dispositivo(id=datos_entrada.id_dispositivo))
+    if not usuario:
+        bd.add(Usuario(id=datos_entrada.id_usuario))
         bd.commit()
     
-    alerta = bd.execute(select(Alerta).where(Alerta.id_dispositivo == datos_entrada.id_dispositivo, Alerta.id_gasolinera == datos_entrada.id_gasolinera, Alerta.tipo_combustible == datos_entrada.tipo_combustible)).scalar_one_or_none()
+    alerta = bd.execute(select(Alerta).where(Alerta.id_usuario == datos_entrada.id_usuario, Alerta.id_gasolinera == datos_entrada.id_gasolinera, Alerta.tipo_combustible == datos_entrada.tipo_combustible)).scalar_one_or_none()
 
     if not alerta:
         nueva_alerta = Alerta(
-            id_dispositivo=datos_entrada.id_dispositivo,
+            id_usuario=datos_entrada.id_usuario,
             id_gasolinera=datos_entrada.id_gasolinera,
             tipo_combustible=datos_entrada.tipo_combustible,
             precio_objetivo=datos_entrada.precio_limite
@@ -129,9 +129,9 @@ def crear_alerta_gasolinera(datos_entrada: AlertaPrecioInput, bd: Session = Depe
 
     return {"mensaje": "Se ha creado la alerta correctamente"}
 
-@app.get("/favoritos/alertas/{id_telefono}/{id_gasolinera}")
-def obtener_alertas_usuario(id_telefono: str, id_gasolinera: str, bd: Session = Depends(obtener_sesion_bd)):
-    consulta = select(Alerta, Gasolinera).join(Gasolinera, Alerta.id_gasolinera == Gasolinera.id).where(Alerta.id_dispositivo == id_telefono, Alerta.id_gasolinera == id_gasolinera)
+@app.get("/favoritos/alertas/{id_usuario}/{id_gasolinera}")
+def obtener_alertas_usuario(id_usuario: str, id_gasolinera: str, bd: Session = Depends(obtener_sesion_bd)):
+    consulta = select(Alerta, Gasolinera).join(Gasolinera, Alerta.id_gasolinera == Gasolinera.id).where(Alerta.id_usuario == id_usuario, Alerta.id_gasolinera == id_gasolinera)
 
     resultados = bd.execute(consulta).all()
 
