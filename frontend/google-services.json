@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414609425604",
+    "project_id": "cheapcomb-916ea",
+    "storage_bucket": "cheapcomb-916ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414609425604:android:20584b671e3954506af591",
+        "android_client_info": {
+          "package_name": "com.kei.cheapcomb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6j-XGW1TWcOz2pxWM9HoeeEvvrNRiOJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

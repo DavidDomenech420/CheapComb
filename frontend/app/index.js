@@ -2,7 +2,9 @@ import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} fr
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import * as Location from 'expo-location';
-import * as Application from 'expo-application'
+import * as Application from 'expo-application';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 
 import { Colores } from "../src/theme";
 
@@ -86,6 +88,25 @@ export default function PantallaInicio() {
                 
             } finally {
                 setCargandoDatos(false)
+                registrarNotificaciones();
+            }
+
+        }
+
+        const registrarNotificaciones = async () => {
+            if (!Device.isDevice) {
+                console.error("Es necesario usar la aplicacion en un movil fisico y no un emulador");
+                return
+            }
+            let estadoActual = await Notifications.getPermissionsAsync();
+
+            if (!estadoActual.granted) {
+                estadoActual = await Notifications.requestPermissionsAsync();
+                if (estadoActual.granted) {
+                    const tokenUsuario = (await Notifications.getExpoPushTokenAsync()).data;
+                    console.log(tokenUsuario);
+                    
+                }
             }
 
         }

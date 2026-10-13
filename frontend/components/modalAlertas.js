@@ -32,7 +32,6 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
 
             const alertasGasolinera = await alertasGasolineraRaw.json();
             setAlertas(alertasGasolinera);
-            console.log(alertasGasolinera);
             
         }
 
@@ -87,6 +86,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
     }
 
     const eliminarAlertaComb = (idAlerta) => {
+        idAlerta = parseInt(idAlerta)
         Alert.alert(
             "Eliminar Alerta",
             "¿Estás seguro de que quieres borrar esta alerta?",
@@ -102,7 +102,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
                             });
                 
                             if (respuesta.ok) {
-                                setAlertas(estadoAnterior => estadoAnterior.filter(alerta => alerta.id != idAlerta))
+                                setAlertas(estadoAnterior => estadoAnterior.filter(alerta => alerta.id_alerta !== idAlerta))
                             }
                         } catch (error) {
                             
@@ -290,7 +290,7 @@ const estilos = StyleSheet.create({
         marginBottom: 15
     },
     textoVacio: {
-        color: Colores.textoOscuro,
+        color: Colores.textoClaro,
         textAlign: 'center',
         fontStyle: 'italic',
         marginTop: 20,
