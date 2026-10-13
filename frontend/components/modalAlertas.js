@@ -32,6 +32,8 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
 
             const alertasGasolinera = await alertasGasolineraRaw.json();
             setAlertas(alertasGasolinera);
+            console.log(alertasGasolinera);
+            
         }
 
         obtenerAlertasGasolinera()
@@ -111,10 +113,10 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
         );
     }
     
-    const pintarAlerta = ({item}) => (
+    const pintarAlerta = ({item}) => (        
         <View style={estilos.itemAlertaCreada}>
             <Text style={estilos.textoAlertasCreadas}> {item.tipo_combustible} - {item.precio_objetivo} €/L</Text>
-            <TouchableOpacity onPress={() => eliminarAlertaComb(item.id)}>
+            <TouchableOpacity onPress={() => eliminarAlertaComb(item.id_alerta)}>
                 <Ionicons name='trash' size={30} color={Colores.eliminar} />
             </TouchableOpacity>
         </View>

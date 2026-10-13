@@ -149,7 +149,7 @@ def obtener_alertas_usuario(id_telefono: str, id_gasolinera: str, bd: Session = 
 
 @app.delete("/alerta_precio/{id_alerta}")
 def borrar_alerta(id_alerta: int, bd: Session = Depends(obtener_sesion_bd)):
-    alerta_borrar = bd.execute(select(Alerta).where(Alerta.id == id_alerta).scalar_one_or_none())
+    alerta_borrar = bd.execute(select(Alerta).where(Alerta.id == id_alerta)).scalar_one_or_none()
 
     if not alerta_borrar:
         raise HTTPException(status_code=404, detail="La alerta no existe o no es tuya")
