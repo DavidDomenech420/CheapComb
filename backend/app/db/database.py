@@ -10,6 +10,7 @@ load_dotenv()
 url_base_datos = os.getenv("URL_BASE_DATOS")
 
 URL_CONEXION_BBDD = url_base_datos
+print(URL_CONEXION_BBDD)
 motor = create_engine(URL_CONEXION_BBDD, echo=False)
 
 class Base(DeclarativeBase):
