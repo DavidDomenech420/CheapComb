@@ -10,6 +10,7 @@ from app.db.modelos.gasolinera import Gasolinera
 from app.db.modelos.favorito import Favorito, GasolineraGuardadaInput
 from app.db.modelos.usuario import Usuario
 from app.db.modelos.alerta import Alerta, AlertaPrecioInput
+from backend.app.db.modelos.dispositivo import Dispositivo, DispositivoInput
 
 # Inicializamos la app de FastAPI
 app = FastAPI(title="API Gasolineras")
@@ -158,3 +159,27 @@ def borrar_alerta(id_alerta: int, bd: Session = Depends(obtener_sesion_bd)):
     bd.commit()
 
     return {"mensaje": "Alerta eliminada correctamente"}
+
+@app.post("/dispositivo/")
+def crear_dispositivo(datos_entrada: DispositivoInput, bd: Session = Depends(obtener_sesion_bd)):
+    usuario = bd.execute(select(Usuario).where(Usuario.id == datos_entrada.id_usuario)).scalar_one_or_none()
+
+    if not usuario:
+        bd.add(Usuario(id=datos_entrada.id_usuario))
+        bd.commit()
+    
+    # Creamos el dispositvo
+    nuevoDispositivo = Dispositivo(
+        token=datos_entrada.token,
+        id_usuario=datos_entrada.id_usuario
+    )
+
+    # Guardamos el dispositivo en la base de datos
+    try:
+        bd.add(nuevoDispositivo)
+        bd.commit()
+        return {"mensaje": "Dispositivo guardado correctamente"}
+    except IntegrityError:
+        # Por si le damos sin querer dos veces y el dispositivo ya estaba guardado, tiramos hacia atras deshaciendo el error
+        bd.rollback()
+        return {"mensaje": "El Dispositivo ya estaba en tu lista"}

@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, String
 from app.db.database import Base
+from pydantic import BaseModel
+
+class DispositivoInput(BaseModel):
+    token: str
+    id_usuario: str
 
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
