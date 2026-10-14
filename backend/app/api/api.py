@@ -10,7 +10,7 @@ from app.db.modelos.gasolinera import Gasolinera
 from app.db.modelos.favorito import Favorito, GasolineraGuardadaInput
 from app.db.modelos.usuario import Usuario
 from app.db.modelos.alerta import Alerta, AlertaPrecioInput
-from backend.app.db.modelos.dispositivo import Dispositivo, DispositivoInput
+from app.db.modelos.dispositivo import Dispositivo, DispositivoInput
 
 # Inicializamos la app de FastAPI
 app = FastAPI(title="API Gasolineras")
