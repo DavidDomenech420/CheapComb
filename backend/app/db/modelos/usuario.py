@@ -7,7 +7,7 @@ class Usuario(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     dispositivos = relationship(
-        "Dispositivo",
+        "dispositivos",
         back_populates="usuarios",
         cascade="all, delete-orphan"
     )
