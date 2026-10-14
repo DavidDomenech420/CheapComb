@@ -104,8 +104,22 @@ export default function PantallaInicio() {
                 estadoActual = await Notifications.requestPermissionsAsync();
                 if (estadoActual.granted) {
                     const tokenUsuario = (await Notifications.getExpoPushTokenAsync()).data;
-                    console.log(tokenUsuario);
-                    
+                    const idUsuario = Application.getAndroidId()
+                    const crearDisp = {
+                        "token": tokenUsuario,
+                        "id_usuario": idUsuario
+                    }
+                    const respuesta = await fetch(`https://cheapcombapi.duckdns.org/dispositivo/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(creacionAlerta)
+                    });
+        
+                    if (!respuesta.ok) {
+                        ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
+                    }
                 }
             }
 
