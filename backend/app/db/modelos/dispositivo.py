@@ -10,7 +10,7 @@ class DispositivoInput(BaseModel):
 class Dispositivo(Base):
     __tablename__ = "dispositivos"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(String, primary_key=True, autoincrement=True)
     token: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     id_usuario: Mapped[str] = mapped_column(ForeignKey("usuarios.id"))
 
