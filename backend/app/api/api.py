@@ -22,7 +22,7 @@ def obtener_sesion_bd():
 
 # Definimos endpoint con el metodo GET
 @app.get("/gasolineras/")
-def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), radio_km: int = 10, longitud_usuario: float = 0, latitud_usuario: float = 0):
+def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), radio_km: int = 10, longitud_usuario: float = 0, latitud_usuario: float = 0, skip: int = 0, limit: int = 10):
     # Construimos la consulta con un limite de que salgan solo las primeras 10 gasolineras
     punto_usuario = f"POINT({longitud_usuario} {latitud_usuario})"
     punto_postgis = WKTElement(punto_usuario, srid=4326)
@@ -33,7 +33,7 @@ def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), ra
             cast(punto_postgis, Geography),
             radio_km * 1000
         )
-    ).order_by(Gasolinera.precio_gasoleo_a.asc()).limit(10)
+    ).order_by(Gasolinera.precio_gasoleo_a.asc()).offset(skip).limit(limit)
 
     # Ejecutamos la consulta, la limpiamos y los metemos a una lista
     lista_gasolinera = bd.execute(consulta).scalars().all()
