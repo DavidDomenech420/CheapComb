@@ -14,11 +14,18 @@ export default function PantallaInicio() {
     const [gasolinerasCercanas, setGasolinerasCercanas] = useState([]);
     const [gasolinerasFavoritas, setGasolinerasFavoritas] = useState([])
     const [cargandoDatos, setCargandoDatos] = useState(true)
+    const [latitudUsuario, setLatitudUsuario] = useState(0)
+    const [longitudUsuario, setLongitudUsuario] = useState(0)
+
 
     // Guardamos el ID de la tarjeta que esta abierta actualmente
     const [idGasolineraAbierta, setIdGasolineraAbierta] = useState(null);
 
     const [relojJefe, setRelojJefe] = useState(Date.now());
+
+    // Variables para aumentar tamaño lista
+    const [salto, setSalto] = useState(0)
+    const [cargarMas, setCargarMas] = useState(false)
 
     // TODO: Si no hay gasolineras cerca poner un texto indicando que no hay gasolineras para cargar
 
@@ -66,7 +73,9 @@ export default function PantallaInicio() {
                 },
                 // Funcion que se llama cada vez que actualizamos radar
                 (ubicacionActualizada) => {
-                    obtenerDatosServidor(ubicacionActualizada.coords.latitude, ubicacionActualizada.coords.longitude)
+                    setLatitudUsuario(ubicacionActualizada.coords.latitude)
+                    setLongitudUsuario(ubicacionActualizada.coords.longitude)
+                    obtenerGasolineras(ubicacionActualizada.coords.latitude, ubicacionActualizada.coords.longitude, true)
                 }
             )
             } catch (error) {
@@ -76,11 +85,27 @@ export default function PantallaInicio() {
 
         
 
-        const obtenerDatosServidor = async (latitud, longitud) => {
+        const obtenerGasolineras = async (latitud, longitud, esCargaInicial = false) => {
+            if (cargarMas) {
+                return
+            }
+    
+            const skipActual = esCargaInicial ? 0 : salto;
+
+            if (!esCargaInicial) {
+                setCargarMas(true)
+            }
             try {                
-                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}`);
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10`);
                 const datosMaquetados = await respuesta.json()
-                setGasolinerasCercanas(datosMaquetados)
+                if (esCargaInicial) {
+                    setGasolinerasCercanas(datosMaquetados)
+                } else {
+                    setGasolinerasCercanas(estadoAnterior => [...estadoAnterior, ...datosMaquetados])
+                }
+
+                setSalto(skipActual + 10)
+                
 
 
             } catch (error) {
@@ -171,7 +196,14 @@ export default function PantallaInicio() {
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
-            <FlatList data={gasolinerasCercanas} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} extraData={relojJefe} />
+            <FlatList 
+                data={gasolinerasCercanas} 
+                keyExtractor={(item) => item.id} 
+                renderItem={pintarGasolinera} 
+                extraData={relojJefe} 
+                onEndReached={() => obtenerGasolineras(latitudUsuario, longitudUsuario, false)}
+                onEndReachedThreshold={0.5} 
+            />
         </View>
     );
 }
