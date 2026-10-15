@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator} from 'react-native'
+import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator, ToastAndroid} from 'react-native'
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import * as Location from 'expo-location';
@@ -102,24 +102,24 @@ export default function PantallaInicio() {
 
             if (!estadoActual.granted) {
                 estadoActual = await Notifications.requestPermissionsAsync();
-                if (estadoActual.granted) {
-                    const tokenUsuario = (await Notifications.getExpoPushTokenAsync()).data;
-                    const idUsuario = Application.getAndroidId()
-                    const crearDisp = {
-                        "token": tokenUsuario,
-                        "id_usuario": idUsuario
-                    }
-                    const respuesta = await fetch(`https://cheapcombapi.duckdns.org/dispositivo/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(creacionAlerta)
-                    });
-        
-                    if (!respuesta.ok) {
-                        ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
-                    }
+            }
+            if (estadoActual.granted) {
+                const tokenUsuario = (await Notifications.getExpoPushTokenAsync()).data;
+                const idUsuario = Application.getAndroidId()
+                const crearDisp = {
+                    "token": tokenUsuario,
+                    "id_usuario": idUsuario
+                }
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/dispositivo/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(crearDisp)
+                });
+    
+                if (!respuesta.ok) {
+                    ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
                 }
             }
 
