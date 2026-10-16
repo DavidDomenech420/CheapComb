@@ -1,6 +1,8 @@
-import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator, ToastAndroid} from 'react-native'
+import {View, Text, StyleSheet, FlatList, LayoutAnimation, ActivityIndicator, ToastAndroid, ScrollView, TouchableOpacity} from 'react-native'
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+
 import * as Location from 'expo-location';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
@@ -153,7 +155,6 @@ export default function PantallaInicio() {
         try {                
             const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10&orden=${orden}`);
             const datosMaquetados = await respuesta.json()
-            console.log(datosMaquetados);
             
             if (esCargaInicial) {
                 setGasolinerasCercanas(datosMaquetados)
@@ -211,13 +212,54 @@ export default function PantallaInicio() {
     return (
         // View es el contenedor general de toda la aplicacion
         <View style={estilos.contenedor}>
+            <View style={estilos.contenedorFiltros}>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false} 
+                    contentContainerStyle={estilos.scrollFiltros}
+                >
+                    {/* Píldora: Precio */}
+                    <TouchableOpacity 
+                        style={[estilos.pildora, orden === 'precio' && estilos.pildoraActiva]}
+                        onPress={() => setOrden('precio')}
+                    >
+                        <Ionicons name="cash-outline" size={16} color={Colores.textoClaro} />
+                        <Text style={[estilos.textoPildora, orden === 'precio' && estilos.textoPildoraActivo]}>
+                            Más barato
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Píldora: Distancia */}
+                    <TouchableOpacity 
+                        style={[estilos.pildora, orden === 'distancia' && estilos.pildoraActiva]}
+                        onPress={() => setOrden('distancia')}
+                    >
+                        <Ionicons name="location-outline" size={16} color={Colores.textoClaro} />
+                        <Text style={[estilos.textoPildora, orden === 'distancia' && estilos.textoPildoraActivo]}>
+                            Más cercano
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Píldora: Mix (Recomendado) */}
+                    <TouchableOpacity 
+                        style={[estilos.pildora, orden === 'mix' && estilos.pildoraActiva]}
+                        onPress={() => setOrden('mix')}
+                    >
+                        <Ionicons name="star-outline" size={16} color={Colores.textoClaro} />
+                        <Text style={[estilos.textoPildora, orden === 'mix' && estilos.textoPildoraActivo]}>
+                            Recomendado
+                        </Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </View>
             <FlatList 
                 data={gasolinerasCercanas} 
                 keyExtractor={(item) => item.id} 
                 renderItem={pintarGasolinera} 
                 extraData={relojJefe} 
                 onEndReached={() => obtenerGasolineras(latitudUsuario, longitudUsuario, false)}
-                onEndReachedThreshold={0.5} 
+                onEndReachedThreshold={0.5}
+                style={{flex: 1}} 
             />
         </View>
     );
@@ -235,4 +277,40 @@ const estilos = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold'
     },
+    contenedorFiltros: {
+        margin: 5,
+        paddingVertical: 10,
+        borderBottomWidth: 2,
+        borderBottomColor: Colores.bordeTargeta,
+        maxHeight: 60,
+    },
+    scrollFiltros: {
+        paddingHorizontal: 15, // Da un margen inicial y final al deslizar
+        gap: 10, // Separación entre las píldoras
+    },
+    pildora: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colores.fondo, // Color gris claro de fondo inactivo
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20, // Hace que los bordes sean totalmente redondeados
+        borderWidth: 2,
+        borderColor: Colores.bordeTargeta,
+    },
+    pildoraActiva: {
+        backgroundColor: Colores.fondoPastilla, // Usa el color principal de tu app (Colores.principal)
+        borderColor: Colores.bordeTargeta,
+    },
+    textoPildora: {
+        marginLeft: 6,
+        fontSize: 14,
+        color: Colores.textoClaro,
+        fontWeight: '500',
+    },
+    textoPildoraActivo: {
+        color: Colores.textoClaro,
+        fontWeight: 'bold',
+    }
 });
