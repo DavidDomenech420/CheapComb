@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons"
 import { Colores } from "../src/theme";
 import { useEffect, useState } from "react";
 
-// TODO: En la zona de alertas creadas, si supera cierto limite de altura que haya un scroll
 
 export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsuario}) {
 
@@ -47,9 +46,6 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
             return null
         }
         
-
-        
-
         try {
             const creacionAlerta = {
                 "id_usuario": String(idUsuario), 
@@ -71,7 +67,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
             } else {
                 const respuestaMaquetada = await respuesta.json();
                 const alertaCreada = {
-                    "id": respuestaMaquetada.id,
+                    "id": respuestaMaquetada.id_alerta,
                     "tipo_combustible": opcionesCombustible.find(combustible => combustible.id == idSeleccionado).nombre,
                     "precio_objetivo": precioFinal
                 };

@@ -77,45 +77,12 @@ export default function PantallaInicio() {
                     setLongitudUsuario(ubicacionActualizada.coords.longitude)
                     obtenerGasolineras(ubicacionActualizada.coords.latitude, ubicacionActualizada.coords.longitude, true)
                 }
-            )
-            } catch (error) {
                 
-            }
-        }
-
-        
-
-        const obtenerGasolineras = async (latitud, longitud, esCargaInicial = false) => {
-            if (cargarMas) {
-                return
-            }
-    
-            const skipActual = esCargaInicial ? 0 : salto;
-
-            if (!esCargaInicial) {
-                setCargarMas(true)
-            }
-            try {                
-                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10`);
-                const datosMaquetados = await respuesta.json()
-                if (esCargaInicial) {
-                    setGasolinerasCercanas(datosMaquetados)
-                } else {
-                    setGasolinerasCercanas(estadoAnterior => [...estadoAnterior, ...datosMaquetados])
-                }
-
-                setSalto(skipActual + 10)
-                
-
-
-            } catch (error) {
-                console.error("Ha habido un error descargando los datos de la API: " + error);
-                
-            } finally {
-                setCargandoDatos(false)
+                )
                 registrarNotificaciones();
+            } catch (error) {
+                
             }
-
         }
 
         const registrarNotificaciones = async () => {
@@ -146,6 +113,8 @@ export default function PantallaInicio() {
                 if (!respuesta.ok) {
                     ToastAndroid.show(`Error en la respuesta de la API: ${respuesta.status}`, ToastAndroid.SHORT)
                 }
+
+                
             }
 
         }
@@ -159,6 +128,38 @@ export default function PantallaInicio() {
             }
         }
     }, [])
+
+    const obtenerGasolineras = async (latitud, longitud, esCargaInicial = false) => {
+        if (cargarMas) {
+            return
+        }
+
+        const skipActual = esCargaInicial ? 0 : salto;
+
+        if (!esCargaInicial) {
+            setCargarMas(true)
+        }
+        try {                
+            const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10`);
+            const datosMaquetados = await respuesta.json()
+            if (esCargaInicial) {
+                setGasolinerasCercanas(datosMaquetados)
+            } else {
+                setGasolinerasCercanas(estadoAnterior => [...estadoAnterior, ...datosMaquetados])
+            }
+
+            setSalto(skipActual + 10)
+            
+
+
+        } catch (error) {
+            console.error("Ha habido un error descargando los datos de la API: " + error);
+            
+        } finally {
+            setCargandoDatos(false)
+        }
+
+    }
 
     const manejarAbrirGasolinera = (id) => {
         // Preparamos la animacion

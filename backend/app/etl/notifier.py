@@ -58,14 +58,14 @@ def revisar_alertas_gasolinera(bd: Session):
             if precio_alerta <= alerta.precio_objetivo and alerta.oferta_activa == False:
                 alerta.oferta_activa = True
                 titulo = "Combustible en Oferton!"
-                msg =f"La gasolinera ha bajado a {precio_alerta}€ el combustible {tipo_combustible_alerta}."
+                msg =f"La gasolinera {gasolinera.nombre} ha bajado a {precio_alerta}€ el combustible {tipo_combustible_alerta}."
                 for dispositivo in usuario.dispositivos:
                     enviar_notif_push(dispositivo.token, titulo, msg)
 
             elif precio_alerta > alerta.precio_objetivo + 0.02 and alerta.oferta_activa == True:
                 alerta.oferta_activa = False
                 titulo = "Subida de Precio!"
-                msg =f"La gasolinera ha subido a {precio_alerta}€ el combustible {tipo_combustible_alerta}."
+                msg =f"La gasolinera {gasolinera.nombre} ha subido a {precio_alerta}€ el combustible {tipo_combustible_alerta}."
                 for dispositivo in usuario.dispositivos:
                     enviar_notif_push(dispositivo.token, titulo, msg)
     
