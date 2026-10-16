@@ -7,7 +7,7 @@ from geoalchemy2.functions import ST_DWithin
 
 from app.db.database import motor
 from app.db.modelos.gasolinera import Gasolinera
-from app.db.modelos.favorito import Favorito, GasolineraGuardadaInput
+from app.db.modelos.favorito import Favorito, FavoritoGuardadoInput, GasolineraGuardadaInput
 from app.db.modelos.usuario import Usuario
 from app.db.modelos.alerta import Alerta, AlertaPrecioInput
 from app.db.modelos.dispositivo import Dispositivo, DispositivoInput
@@ -106,8 +106,8 @@ def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Sess
         return {"mensaje": "La Gasolinera ya estaba en tu lista"}
 
 @app.delete("/gasolineras_favoritas/{id_gasolinera}")
-def borrar_favorito(id_gasolinera: str, id_usuario: str, bd: Session = Depends(obtener_sesion_bd)):
-    favorito_borrar = bd.execute(select(Favorito).where(Favorito.id_gasolinera == id_gasolinera, Favorito.id_usuario == id_usuario)).scalar_one_or_none()
+def borrar_favorito(datosFav: FavoritoGuardadoInput, bd: Session = Depends(obtener_sesion_bd)):
+    favorito_borrar = bd.execute(select(Favorito).where(Favorito.id_gasolinera == datosFav.id_gasolinera, Favorito.id_usuario == datosFav.id_usuario)).scalar_one_or_none()
 
     if not favorito_borrar:
         raise HTTPException(status_code=404, detail="El favorito no existe o no es tuyo")

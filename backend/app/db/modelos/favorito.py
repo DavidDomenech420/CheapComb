@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey
 from app.db.database import Base
 from pydantic import BaseModel
 
-class GasolineraGuardadaInput (BaseModel):
+class FavoritoGuardadoInput (BaseModel):
     id_usuario: str
     id_gasolinera: str
 
