@@ -7,7 +7,7 @@ from geoalchemy2.functions import ST_DWithin
 
 from app.db.database import motor
 from app.db.modelos.gasolinera import Gasolinera
-from app.db.modelos.favorito import Favorito, FavoritoGuardadoInput, GasolineraGuardadaInput
+from app.db.modelos.favorito import Favorito, FavoritoGuardadoInput
 from app.db.modelos.usuario import Usuario
 from app.db.modelos.alerta import Alerta, AlertaPrecioInput
 from app.db.modelos.dispositivo import Dispositivo, DispositivoInput
@@ -73,7 +73,7 @@ def obtener_gasolineras_favoritas(id_usuario: str, bd: Session = Depends(obtener
 
 
 @app.post("/gasolineras_favoritas/", status_code=201)
-def guardar_gasolinera_favorita(datos_entrada: GasolineraGuardadaInput, bd: Session = Depends(obtener_sesion_bd)):
+def guardar_gasolinera_favorita(datos_entrada: FavoritoGuardadoInput, bd: Session = Depends(obtener_sesion_bd)):
     # Comprobamos que la gasolinera que queremos guardar existe
     gasolinera_existe = bd.execute(select(Gasolinera).where(Gasolinera.id == datos_entrada.id_gasolinera)).scalar_one_or_none()
 
