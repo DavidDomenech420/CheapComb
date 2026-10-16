@@ -44,7 +44,7 @@ def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), ra
     elif (orden == "mix"):
         consulta = consulta.order_by(
             (
-                (Gasolinera.precio_gasolina_95_e5.asc() * 1000) +
+                (Gasolinera.precio_gasolina_95_e5 * 1000) +
                 Gasolinera.ubicacion_geometrica.ST_Distance(punto_postgis)
             ).asc())
 

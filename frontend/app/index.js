@@ -16,7 +16,7 @@ export default function PantallaInicio() {
     const [cargandoDatos, setCargandoDatos] = useState(true)
     const [latitudUsuario, setLatitudUsuario] = useState(0)
     const [longitudUsuario, setLongitudUsuario] = useState(0)
-    const [orden, setOrden] = useState("precio")
+    const [orden, setOrden] = useState("mix")
 
 
     // Guardamos el ID de la tarjeta que esta abierta actualmente
@@ -153,6 +153,8 @@ export default function PantallaInicio() {
         try {                
             const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10&orden=${orden}`);
             const datosMaquetados = await respuesta.json()
+            console.log(datosMaquetados);
+            
             if (esCargaInicial) {
                 setGasolinerasCercanas(datosMaquetados)
             } else {
