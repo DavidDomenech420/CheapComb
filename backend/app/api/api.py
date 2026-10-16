@@ -22,18 +22,34 @@ def obtener_sesion_bd():
 
 # Definimos endpoint con el metodo GET
 @app.get("/gasolineras/")
-def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), radio_km: int = 10, longitud_usuario: float = 0, latitud_usuario: float = 0, skip: int = 0, limit: int = 10):
+def obtener_gasolineras_radio_10_km(bd: Session = Depends(obtener_sesion_bd), radio_km: int = 10, longitud_usuario: float = 0, latitud_usuario: float = 0, skip: int = 0, limit: int = 10, orden : str = "precio"):
     # Construimos la consulta con un limite de que salgan solo las primeras 10 gasolineras
     punto_usuario = f"POINT({longitud_usuario} {latitud_usuario})"
     punto_postgis = WKTElement(punto_usuario, srid=4326)
 
+    
     consulta = select(Gasolinera).options(defer(Gasolinera.ubicacion_geometrica)).where(
         ST_DWithin(
             cast(Gasolinera.ubicacion_geometrica, Geography),
             cast(punto_postgis, Geography),
             radio_km * 1000
         )
-    ).order_by(Gasolinera.precio_gasoleo_a.asc()).offset(skip).limit(limit)
+    )
+    
+    # Zona de selección de orden
+    if(orden == "precio"):
+        consulta = consulta.order_by(Gasolinera.precio_gasolina_95_e5.asc())
+    elif (orden == "distancia"):
+        consulta = consulta.order_by(Gasolinera.ubicacion_geometrica.ST_Distance(punto_postgis).asc())
+    elif (orden == "mix"):
+        consulta = consulta.order_by(
+            (
+                (Gasolinera.precio_gasolina_95_e5.asc() * 1000) +
+                Gasolinera.ubicacion_geometrica.ST_Distance(punto_postgis)
+            ).asc())
+
+    # Zona de limite y offset
+    consulta = consulta.offset(skip).limit(limit)
 
     # Ejecutamos la consulta, la limpiamos y los metemos a una lista
     lista_gasolinera = bd.execute(consulta).scalars().all()

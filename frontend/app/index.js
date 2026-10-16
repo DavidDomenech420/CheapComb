@@ -16,6 +16,7 @@ export default function PantallaInicio() {
     const [cargandoDatos, setCargandoDatos] = useState(true)
     const [latitudUsuario, setLatitudUsuario] = useState(0)
     const [longitudUsuario, setLongitudUsuario] = useState(0)
+    const [orden, setOrden] = useState("precio")
 
 
     // Guardamos el ID de la tarjeta que esta abierta actualmente
@@ -29,7 +30,6 @@ export default function PantallaInicio() {
 
     // TODO: Si no hay gasolineras cerca poner un texto indicando que no hay gasolineras para cargar
 
-    // TODO: Hacer que aparezcan gasolineras de 10 en 10, y si estamos al final de la lista carguen los otros 10
 
     useFocusEffect(
         useCallback(() => {
@@ -50,6 +50,7 @@ export default function PantallaInicio() {
         }, [])
     )
 
+    // UseEffect inicial al entrar a la pantalla
     useEffect(() => {
         
         let suscripcionRadar = null; // Variable para guardar la conexion con el radar
@@ -129,6 +130,16 @@ export default function PantallaInicio() {
         }
     }, [])
 
+    useEffect(() => {
+        const modificarOrdenLista = () => {
+            setGasolinerasCercanas([])
+            setSalto(0)
+            obtenerGasolineras(latitudUsuario, longitudUsuario, true)
+        }
+
+        modificarOrdenLista()
+    }, [orden])
+
     const obtenerGasolineras = async (latitud, longitud, esCargaInicial = false) => {
         if (cargarMas) {
             return
@@ -140,7 +151,7 @@ export default function PantallaInicio() {
             setCargarMas(true)
         }
         try {                
-            const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10`);
+            const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras/?latitud_usuario=${latitud}&longitud_usuario=${longitud}&skip=${skipActual}&limit=10&orden=${orden}`);
             const datosMaquetados = await respuesta.json()
             if (esCargaInicial) {
                 setGasolinerasCercanas(datosMaquetados)
@@ -157,6 +168,7 @@ export default function PantallaInicio() {
             
         } finally {
             setCargandoDatos(false)
+            setCargarMas(false)
         }
 
     }
