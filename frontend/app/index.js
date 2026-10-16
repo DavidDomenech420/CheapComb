@@ -159,7 +159,15 @@ export default function PantallaInicio() {
             if (esCargaInicial) {
                 setGasolinerasCercanas(datosMaquetados)
             } else {
-                setGasolinerasCercanas(estadoAnterior => [...estadoAnterior, ...datosMaquetados])
+                setGasolinerasCercanas(estadoAnterior => {
+                    // Filtramos los datos nuevos: solo dejamos pasar los que NO tengan un ID que ya exista en la pantalla
+                    const gasolinerasFiltradas = datosMaquetados.filter(
+                        gasolineraNueva => !estadoAnterior.some(gasolineraExistente => gasolineraExistente.id === gasolineraNueva.id)
+                    );
+                    
+                    // Concatenamos los datos limpios
+                    return [...estadoAnterior, ...gasolinerasFiltradas];
+                });
             }
 
             setSalto(skipActual + 10)
@@ -199,6 +207,13 @@ export default function PantallaInicio() {
             actualizacion={relojJefe}
         />
     )
+
+    const MensajeListaVacia = () => (
+        <View style={estilos.contenedorVacio}>
+            <Ionicons name="search-outline" size={60} color={Colores.textoOscuro} />
+            <Text style={estilos.titulo}>No hay gasolineras cercanas en este momento.</Text>
+        </View>
+    );
 
     if (cargandoDatos) {
         return (
@@ -256,7 +271,8 @@ export default function PantallaInicio() {
                 data={gasolinerasCercanas} 
                 keyExtractor={(item) => item.id} 
                 renderItem={pintarGasolinera} 
-                extraData={relojJefe} 
+                extraData={relojJefe}
+                ListEmptyComponent={MensajeListaVacia}
                 onEndReached={() => obtenerGasolineras(latitudUsuario, longitudUsuario, false)}
                 onEndReachedThreshold={0.5}
                 style={{flex: 1}} 
@@ -271,6 +287,13 @@ const estilos = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: Colores.fondo
+    },
+    contenedorVacio: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 100, // Lo empuja un poco hacia el centro real de la pantalla
+        paddingHorizontal: 30,
     },
     titulo: {
         color: Colores.textoClaro,

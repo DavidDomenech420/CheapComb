@@ -144,6 +144,13 @@ export default function PantallaFavorito() {
         />
     )
 
+    const MensajeListaVacia = () => (
+        <View style={estilos.contenedorVacio}>
+            <Ionicons name="star-outline" size={60} color={Colores.textoOscuro} />
+            <Text style={estilos.titulo}>No hay gasolineras favoritas en este momento.</Text>
+        </View>
+    );
+
     if (cargandoDatos) {
         return (
             <View style={estilos.contenedor}>
@@ -202,7 +209,7 @@ export default function PantallaFavorito() {
                     </TouchableOpacity>
                 </ScrollView>
             </View>
-            <FlatList data={favoritosOrdenados} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} />
+            <FlatList data={favoritosOrdenados} keyExtractor={(item) => item.id} renderItem={pintarGasolinera} ListEmptyComponent={MensajeListaVacia} />
         </View>
     );
 }
@@ -213,6 +220,13 @@ const estilos = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: Colores.fondo
+    },
+    contenedorVacio: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 100, // Lo empuja un poco hacia el centro real de la pantalla
+        paddingHorizontal: 30,
     },
     titulo: {
         color: Colores.textoClaro,

@@ -137,7 +137,7 @@ export default function ModalAlertas({visible, cerrarModal, idGasolinera, idUsua
 
     // Zona Visual
         return(
-            <Modal visible={visible} transparent={true} animationType="fade" >
+            <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={cerrarModal} >
                 <View style={estilos.fondoOscuro}>
                     <View style={estilos.popUp} >
                         <View>
