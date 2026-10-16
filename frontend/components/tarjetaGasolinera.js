@@ -45,7 +45,7 @@ export default function TarjetaGasolinera({ datosGasolinera, abierta, alternarDe
         } else {
             try {
                 const id_gasolinera = datosGasolinera.id
-                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/${id_gasolinera}?id_dispositivo=${idUsuario}`, {
+                const respuesta = await fetch(`https://cheapcombapi.duckdns.org/gasolineras_favoritas/${id_gasolinera}?id_usuario=${idUsuario}`, {
                     method: 'DELETE',
                 })
                 if (!respuesta.ok) {
